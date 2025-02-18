@@ -4,9 +4,9 @@ pyTMD
 
 |License|
 |Documentation Status|
-|Coverage Status|
 |PyPI|
 |conda-forge|
+|commits-since|
 |zenodo|
 
 .. |License| image:: https://img.shields.io/github/license/pyTMD/pyTMD
@@ -15,14 +15,14 @@ pyTMD
 .. |Documentation Status| image:: https://readthedocs.org/projects/pytmd/badge/?version=latest
    :target: https://pytmd.readthedocs.io/en/latest/?badge=latest
 
-.. |Coverage Status| image:: https://codecov.io/gh/pyTMD/pyTMD/graph/badge.svg?token=TX5RPZCWUB 
-   :target: https://codecov.io/gh/pyTMD/pyTMD
-
 .. |PyPI| image:: https://img.shields.io/pypi/v/pyTMD.svg
    :target: https://pypi.python.org/pypi/pyTMD/
 
 .. |conda-forge| image:: https://img.shields.io/conda/vn/conda-forge/pytmd
    :target: https://anaconda.org/conda-forge/pytmd
+
+.. |commits-since| image:: https://img.shields.io/github/commits-since/pyTMD/pyTMD/latest
+   :target: https://github.com/pyTMD/pyTMD/releases
 
 .. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.5555395.svg
    :target: https://doi.org/10.5281/zenodo.5555395
