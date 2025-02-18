@@ -20,8 +20,10 @@ The available examples include:
    ../notebooks/Plot-Antarctic-Tide-Range
    ../notebooks/Plot-Arctic-Ocean-Map
    ../notebooks/Plot-ATLAS-Compact
+   ../notebooks/Plot-Earth-Orientation-Parameters
    ../notebooks/Plot-Ocean-Pole-Tide-Map
    ../notebooks/Plot-Ross-Ice-Shelf-Map
+   ../notebooks/Plot-Solid-Earth-Tides
    ../notebooks/Plot-Tidal-Spectra
    ../notebooks/Plot-Tide-Forecasts
    ../notebooks/Plot-Tide-Form-Factor
@@ -81,6 +83,12 @@ The available examples include:
 
 .. grid:: 1 2 4 4
 
+    .. grid-item-card::  Plot Earth Orientation
+      :text-align: center
+      :img-top: ../_assets/EOP.png
+      :link: ../notebooks/Plot-Earth-Orientation-Parameters.html
+      :link-alt: Plots X and Y pole positions over time
+
     .. grid-item-card::  Plot Ocean Pole Tide Map
       :text-align: center
       :img-top: ../_assets/ocean_pole_tide_map.png
@@ -93,6 +101,14 @@ The available examples include:
       :link: ../notebooks/Plot-Ross-Ice-Shelf-Map.html
       :link-alt: Creates an animation of hourly tidal elevations for the Ross Ice Shelf
 
+    .. grid-item-card::  Plot Solid Earth Tides
+      :text-align: center
+      :img-top: ../_assets/solid_earth_tides.png
+      :link: ../notebooks/Plot-Solid-Earth-Tides.html
+      :link-alt: Creates a global animation of hourly solid Earth tides
+
+.. grid:: 1 2 4 4
+
     .. grid-item-card::  Plot Tidal Spectra
       :text-align: center
       :img-top: ../_assets/tidal_spectra.png
@@ -104,8 +120,6 @@ The available examples include:
       :img-top: ../_assets/tide_forecasts.png
       :link: ../notebooks/Plot-Tide-Forecasts.html
       :link-alt: Plots a weekly forecast of tidal displacements at a given location
-
-.. grid:: 1 2 4 4
 
     .. grid-item-card::  Plot Tide Form Factor
       :text-align: center
