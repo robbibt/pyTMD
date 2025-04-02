@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 astro.py
-Written by Tyler Sutterley (03/2025)
+Written by Tyler Sutterley (04/2025)
 Astronomical and nutation routines
 
 PYTHON DEPENDENCIES:
@@ -17,6 +17,8 @@ REFERENCES:
 
 UPDATE HISTORY:
     Updated 04/2025: added schureman arguments function for FES models
+        more outputs from schureman arguments function for M1 constituent
+        use flexible case for mean longitude method strings
     Updated 03/2025: changed argument for method calculating mean longitudes
         split ICRS rotation matrix from the ITRS function 
         added function to correct for aberration effects
@@ -159,7 +161,7 @@ def mean_longitudes(
         warnings.warn("Deprecated argument", DeprecationWarning)
         kwargs['method'] = 'ASTRO5'
     # compute the mean longitudes
-    if (kwargs['method'] == 'Meeus'):
+    if (kwargs['method'].title() == 'Meeus'):
         # convert from MJD to days relative to 2000-01-01T12:00:00
         T = MJD - _mjd_j2000
         # mean longitude of moon
@@ -180,7 +182,7 @@ def mean_longitudes(
         N = polynomial_sum(lunar_node, T)
         # mean longitude of solar perigee (Simon et al., 1994)
         Ps = 282.94 + (1.7192 * T)/_century
-    elif (kwargs['method'] == 'ASTRO5'):
+    elif (kwargs['method'].upper() == 'ASTRO5'):
         # convert from MJD to centuries relative to 2000-01-01T12:00:00
         T = (MJD - _mjd_j2000)/_century
         # mean longitude of moon (p. 338)
@@ -200,7 +202,7 @@ def mean_longitudes(
         N = polynomial_sum(lunar_node, T)
         # mean longitude of solar perigee (Simon et al., 1994)
         Ps = 282.94 + 1.7192 * T
-    elif (kwargs['method'] == 'IERS'):
+    elif (kwargs['method'].upper() == 'IERS'):
         # compute the Delaunay arguments (IERS conventions)
         l, lp, F, D, omega = delaunay_arguments(MJD)
         # degrees to radians
@@ -217,7 +219,7 @@ def mean_longitudes(
         # longitude of solar perigee
         Ps = (-lp + F - D + omega)/dtr
     else:
-        # Formulae for the period 1990--2010 were derived by David Cartwright
+        # Formulae for the period 1990--2010 derived by David Cartwright
         # convert from MJD to days relative to 2000-01-01T12:00:00
         # convert from Universal Time to Dynamic Time at 2000-01-01
         T = MJD - 51544.4993
@@ -364,7 +366,7 @@ def delaunay_arguments(MJD: np.ndarray):
     """
     # arcseconds to radians
     atr = np.pi/648000.0
-    # convert from MJD to centuries relative to 20math00-01-01T12:00:00
+    # convert from MJD to centuries relative to 2000-01-01T12:00:00
     T = (MJD - _mjd_j2000)/_century
     # 360 degrees
     circle = 1296000
@@ -419,10 +421,14 @@ def schureman_arguments(
         longitude in the moon's orbit of lunar intersection (radians)
     nu: np.ndarray
         right ascension of lunar intersection (radians)
-    R: np.ndarray
-        term in argument for l2 constituent (radians)
+    Qa: np.ndarray
+        factor in amplitude for m1 constituent (radians)
+    Qu: np.ndarray
+        term in argument for m1 constituent (radians)
     Ra: np.ndarray
         factor in amplitude for l2 constituent (radians)
+    Ru: np.ndarray
+        term in argument for l2 constituent (radians)
     nu_p: np.ndarray
         term in argument for k1 constituent (radians)
     nu_s: np.ndarray
@@ -442,10 +448,16 @@ def schureman_arguments(
     # mean longitude of lunar perigee reckoned from the lunar intersection
     # Schureman (page 41)
     p = (P - xi)
+    # Schureman (page 42) equation 202
+    Q = np.arctan((5.0*np.cos(I) - 1.0)*np.tan(p)/(7.0*np.cos(I) + 1.0))
+    # Schureman (page 41) equation 197
+    Qa = np.pow(2.31 + 1.435*np.cos(2.0*p), -0.5)
+    # Schureman (page 42) equation 204
+    Qu = p - Q
     # Schureman (page 44) equation 214
     P_R = np.sin(2.0*p)
     Q_R = np.pow(np.tan(I/2.0), -2.0)/6.0 - np.cos(2.0*p)
-    R = np.arctan(P_R/Q_R)
+    Ru = np.arctan(P_R/Q_R)
     # Schureman (page 44) equation 213
     # note that Ra is normally used as an inverse (1/Ra)
     term1 = 12.0*np.pow(np.tan(I/2.0), 2.0)*np.cos(2.0*p)
@@ -460,7 +472,7 @@ def schureman_arguments(
     Q_sec = (np.sin(I)**2)*np.cos(2.0*nu) + 0.0727
     nu_s = 0.5*np.arctan(P_sec/Q_sec)
     # return as tuple
-    return (I, xi, nu, R, Ra, nu_p, nu_s)
+    return (I, xi, nu, Qa, Qu, Ra, Ru, nu_p, nu_s)
 
 def mean_obliquity(MJD: np.ndarray):
     """Mean obliquity of the ecliptic
