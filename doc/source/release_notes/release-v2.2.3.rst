@@ -44,5 +44,8 @@
 * ``feat``: use ``schureman_arguments`` function for FES nodal variables `(#405) <https://github.com/pyTMD/pyTMD/pull/405>`_
 * ``refactor``: convert longitudes ``p`` and ``n`` to radians within ``nodal`` function `(#405) <https://github.com/pyTMD/pyTMD/pull/405>`_
 * ``test``: moved ``astro`` tests into new module `(#405) <https://github.com/pyTMD/pyTMD/pull/405>`_
+* ``feat``: added Schureman to list of M1 options in nodal arguments `(#406) <https://github.com/pyTMD/pyTMD/pull/406>`_
+* ``test``: include schureman argument test at 1900 `(#406) <https://github.com/pyTMD/pyTMD/pull/406>`_
+* ``fix``: use flexible case for mean longitude method strings `(#406) <https://github.com/pyTMD/pyTMD/pull/406>`_
 
 .. __: https://github.com/pyTMD/pyTMD/releases/tag/2.2.3

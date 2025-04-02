@@ -82,6 +82,7 @@ __all__ = [
     "delaunay_arguments",
     "schureman_arguments",
     "mean_obliquity",
+    "equation_of_time",
     "solar_ecef",
     "solar_approximate",
     "solar_ephemerides",
