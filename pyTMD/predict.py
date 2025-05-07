@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 predict.py
-Written by Tyler Sutterley (03/2025)
+Written by Tyler Sutterley (05/2025)
 Prediction routines for ocean, load, equilibrium and solid earth tides
 
 REFERENCES:
@@ -12,6 +12,8 @@ PYTHON DEPENDENCIES:
     numpy: Scientific Computing Tools For Python
         https://numpy.org
         https://numpy.org/doc/stable/user/numpy-for-matlab-users.html
+    timescale: Python tools for time and astronomical calculations
+        https://pypi.org/project/timescale/
 
 PROGRAM DEPENDENCIES:
     arguments.py: loads nodal corrections for tidal constituents
@@ -20,6 +22,7 @@ PROGRAM DEPENDENCIES:
     spatial.py: utilities for working with geospatial data
 
 UPDATE HISTORY:
+    Updated 05/2025: pass keyword arguments to nodal corrections functions
     Updated 03/2025: changed argument for method calculating mean longitudes
     Updated 02/2025: verify dimensions of harmonic constants
     Updated 11/2024: use Love numbers for long-period tides when inferring
@@ -107,7 +110,8 @@ def map(t: float | np.ndarray,
         hc: np.ndarray,
         constituents: list | np.ndarray,
         deltat: float | np.ndarray = 0.0,
-        corrections: str = 'OTIS'
+        corrections: str = 'OTIS',
+        **kwargs
     ):
     """
     Predict tides at a single time using harmonic
@@ -125,6 +129,8 @@ def map(t: float | np.ndarray,
         time correction for converting to Ephemeris Time (days)
     corrections: str, default 'OTIS'
         use nodal corrections from OTIS/ATLAS or GOT/FES models
+    **kwargs: dict
+        keyword arguments for nodal corrections functions
 
     Returns
     -------
@@ -140,7 +146,8 @@ def map(t: float | np.ndarray,
     pu, pf, G = pyTMD.arguments.arguments(t + _mjd_tide,
         constituents,
         deltat=deltat,
-        corrections=corrections
+        corrections=corrections,
+        **kwargs
     )
     # allocate for output tidal elevation
     ht = np.ma.zeros((npts))
@@ -167,7 +174,8 @@ def drift(t: float | np.ndarray,
         hc: np.ndarray,
         constituents: list | np.ndarray,
         deltat: float | np.ndarray = 0.0,
-        corrections: str = 'OTIS'
+        corrections: str = 'OTIS',
+        **kwargs
     ):
     """
     Predict tides at multiple times and locations using harmonic
@@ -185,6 +193,8 @@ def drift(t: float | np.ndarray,
         time correction for converting to Ephemeris Time (days)
     corrections: str, default 'OTIS'
         use nodal corrections from OTIS/ATLAS or GOT/FES models
+    **kwargs: dict
+        keyword arguments for nodal corrections functions
 
     Returns
     -------
@@ -200,7 +210,8 @@ def drift(t: float | np.ndarray,
     pu, pf, G = pyTMD.arguments.arguments(t + _mjd_tide,
         constituents,
         deltat=deltat,
-        corrections=corrections
+        corrections=corrections,
+        **kwargs
     )
     # allocate for output time series
     ht = np.ma.zeros((nt))
@@ -227,7 +238,8 @@ def time_series(t: float | np.ndarray,
         hc: np.ndarray,
         constituents: list | np.ndarray,
         deltat: float | np.ndarray = 0.0,
-        corrections: str = 'OTIS'
+        corrections: str = 'OTIS',
+        **kwargs
     ):
     """
     Predict tidal time series at a single location using harmonic
@@ -245,6 +257,8 @@ def time_series(t: float | np.ndarray,
         time correction for converting to Ephemeris Time (days)
     corrections: str, default 'OTIS'
         use nodal corrections from OTIS/ATLAS or GOT/FES models
+    **kwargs: dict
+        keyword arguments for nodal corrections functions
 
     Returns
     -------
@@ -260,7 +274,8 @@ def time_series(t: float | np.ndarray,
     pu, pf, G = pyTMD.arguments.arguments(t + _mjd_tide,
         constituents,
         deltat=deltat,
-        corrections=corrections
+        corrections=corrections,
+        **kwargs
     )
     # allocate for output time series
     ht = np.ma.zeros((nt))
