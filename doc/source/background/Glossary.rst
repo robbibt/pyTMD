@@ -6,11 +6,11 @@ Glossary
     Aliasing
         spurious tidal frequency appearing in an analysis due to inadequate temporal sampling
 
-    Amplitude
-        one half of the range of a tidal constituent
-
     Amphidrome
         point of zero tidal amplitude in a tidal wave due to a canceling of tidal waves
+
+    Amplitude
+        one half of the range of a tidal constituent
 
     Anomaly
         angular distance between the perihelion and the position of a celestial body
