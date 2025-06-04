@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 OTIS.py
-Written by Tyler Sutterley (12/2024)
+Written by Tyler Sutterley (05/2025)
 
 Reads files for a tidal model and makes initial calculations to run tide program
 Includes functions to extract tidal harmonic constants from OTIS tide models for
@@ -36,6 +36,8 @@ OPTIONS:
         ATLAS: reading a global solution with localized solutions
         TMD3: combined global or local netCDF4 solution
         OTIS: combined global or local solution
+    constituents: list or None, default None
+        Specify constituents to read from model
     apply_flexure: apply ice flexure scaling factor to constituents
 
 OUTPUTS:
@@ -58,6 +60,7 @@ PROGRAM DEPENDENCIES:
     interpolate.py: interpolation routines for spatial data
 
 UPDATE HISTORY:
+    Updated 05/2025: added option to select constituents to read from model
     Updated 12/2024: released version of TMD3 has different variable names
     Updated 11/2024: expose buffer distance for cropping tide model data
     Updated 10/2024: save latitude and longitude to output constituent object
@@ -210,6 +213,8 @@ def extract_constants(
             - ``'ATLAS'``: reading a global solution with localized solutions
             - ``'OTIS'``: combined global or local solution
             - ``'TMD3'``: combined global or local netCDF4 solution
+    constituents: list or None, default None
+        Specify constituents to read from model
     crop: bool, default False
         Crop tide model data to (buffered) bounds
     bounds: list or NoneType, default None
@@ -245,6 +250,7 @@ def extract_constants(
     # set default keyword arguments
     kwargs.setdefault('type', 'z')
     kwargs.setdefault('grid', 'OTIS')
+    kwargs.setdefault('constituents', None)
     kwargs.setdefault('crop', False)
     kwargs.setdefault('bounds', None)
     kwargs.setdefault('buffer', None)
@@ -394,12 +400,19 @@ def extract_constants(
     elif kwargs['type'] in ('z','V','U'):
         unit_conv = 1.0
 
-    # read and interpolate each constituent
+    # read list of constituents
     if isinstance(model_file,list):
-        constituents = [read_constituents(m)[0].pop() for m in model_file]
-        nc = len(constituents)
+        cons = [read_constituents(m)[0].pop() for m in model_file]
+        nc = len(cons)
     else:
-        constituents,nc = read_constituents(model_file, grid=kwargs['grid'])
+        cons,nc = read_constituents(model_file, grid=kwargs['grid'])
+    # reduce number of constituents
+    if kwargs['constituents'] is not None:
+        # verify that constituents is a list
+        if isinstance(kwargs['constituents'], str):
+            kwargs['constituents'] = [kwargs['constituents']]
+        # number of constituents to read
+        nc = len(kwargs['constituents'])
 
     # number of output data points
     npts = len(D)
@@ -407,8 +420,17 @@ def extract_constants(
     amplitude.mask = np.zeros((npts,nc), dtype=bool)
     ph = np.ma.zeros((npts,nc))
     ph.mask = np.zeros((npts,nc), dtype=bool)
+    constituents = []
     # read and interpolate each constituent
-    for i,c in enumerate(constituents):
+    for j in range(nc):
+        # if reading a specific constituent
+        if (kwargs['constituents'] is not None):
+            c = kwargs['constituents'][j]
+        else:
+            c = cons[j]
+        # find index of constituent in list
+        i = cons.index(c)
+        # read constituent for type
         if (kwargs['type'] == 'z'):
             # read z constituent from elevation file
             if (kwargs['grid'] == 'ATLAS'):
@@ -503,13 +525,15 @@ def extract_constants(
                 is_geographic=is_geographic)
         # convert units
         # amplitude and phase of the constituent
-        amplitude.data[:,i] = np.abs(hci.data)/unit_conv
-        amplitude.mask[:,i] = np.copy(hci.mask)
-        ph.data[:,i] = np.arctan2(-np.imag(hci), np.real(hci))
-        ph.mask[:,i] = np.copy(hci.mask)
+        amplitude.data[:,j] = np.abs(hci.data)/unit_conv
+        amplitude.mask[:,j] = np.copy(hci.mask)
+        ph.data[:,j] = np.arctan2(-np.imag(hci), np.real(hci))
+        ph.mask[:,j] = np.copy(hci.mask)
         # update mask to invalidate points outside model domain
-        ph.mask[:,i] |= invalid
-        amplitude.mask[:,i] |= invalid
+        ph.mask[:,j] |= invalid
+        amplitude.mask[:,j] |= invalid
+        # append constituent to list
+        constituents.append(c)
 
     # convert phase to degrees
     phase = ph*180.0/np.pi
@@ -552,6 +576,8 @@ def read_constants(
             - ``'ATLAS'``: reading a global solution with localized solutions
             - ``'OTIS'``: combined global or local solution
             - ``'TMD3'``: combined global or local netCDF4 solution
+    constituents: list or None, default None
+        Specify constituents to read from model
     crop: bool, default False
         Crop tide model data to (buffered) bounds
     bounds: list or NoneType, default None
@@ -569,6 +595,7 @@ def read_constants(
     # set default keyword arguments
     kwargs.setdefault('type', 'z')
     kwargs.setdefault('grid', 'OTIS')
+    kwargs.setdefault('constituents', None)
     kwargs.setdefault('crop', False)
     kwargs.setdefault('bounds', None)
     kwargs.setdefault('buffer', 0)
@@ -664,18 +691,34 @@ def read_constants(
     gridx, gridy = np.meshgrid(xi, yi)
     lon, lat = crs.transform(gridx, gridy, direction='INVERSE')
 
-    # read each constituent
+    # read list of constituents
     if isinstance(model_file, list):
         cons = [read_constituents(m)[0].pop() for m in model_file]
+        nc = len(cons)
     else:
-        cons,_ = read_constituents(model_file, grid=kwargs['grid'])
+        cons,nc = read_constituents(model_file, grid=kwargs['grid'])
+    # reduce number of constituents
+    if kwargs['constituents'] is not None:
+        # verify that constituents is a list
+        if isinstance(kwargs['constituents'], str):
+            kwargs['constituents'] = [kwargs['constituents']]
+        # number of constituents to read
+        nc = len(kwargs['constituents'])
+
     # save output constituents and coordinate reference system
     constituents = pyTMD.io.constituents(x=xi, y=yi,
         bathymetry=bathymetry.data, mask=mask, crs=crs,
         longitude=lon, latitude=lat)
 
     # read each model constituent
-    for i,c in enumerate(cons):
+    for j in range(nc):
+        # if reading a specific constituent
+        if (kwargs['constituents'] is not None):
+            c = kwargs['constituents'][j]
+        else:
+            c = cons[j]
+        # find index of constituent in list
+        i = cons.index(c)
         if (kwargs['type'] == 'z'):
             # read constituent from elevation file
             if (kwargs['grid'] == 'ATLAS'):
