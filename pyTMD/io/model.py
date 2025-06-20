@@ -127,7 +127,11 @@ def load_database(extra_databases: list = []):
     # load any additional databases
     for db in extra_databases:
         with open(db, 'r', encoding='utf-8') as fid:
-            parameters.update(json.load(fid))
+            extra = json.load(fid)
+            # Add additional models to database, accounting
+            # for top level elevation and current dict keys
+            for key, val in extra.items():
+                parameters[key].update(val)
     # return parameters
     return DataBase(**parameters)
 
