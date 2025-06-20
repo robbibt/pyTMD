@@ -796,7 +796,7 @@ def test_read_database():
     "extra_databases",
     [
         # Extra database as a JSON file
-        ["extra_database.json"],
+        [filepath.joinpath("extra_database.json")],
         # Extra database as a dictionary
         [
             {
@@ -839,8 +839,8 @@ def test_read_extra_database(extra_databases):
     """Tests that extra model databases can be read in file and dict format
     """
     # load default db, and default + extra db
-    db_default = load_database()
-    db_extra = load_database(extra_databases=extra_databases)
+    db_default = pyTMD.io.load_database()
+    db_extra = pyTMD.io.load_database(extra_databases=extra_databases)
     # verify that custom model exists in db
     assert 'EOT20_custom' not in db_default['elevation'].keys()
     assert 'EOT20_custom' in db_extra['elevation'].keys()
