@@ -790,3 +790,16 @@ def test_read_database():
     # assert that models are accessible
     assert pyTMD.models.elevation.get('CATS2008') is not None
     assert pyTMD.models.current.get('CATS2008') is not None
+
+# PURPOSE: test that extra model databases are correctly read
+def test_read_extra_database():
+    """Tests that extra model databases are correctly read
+    """
+    # load default db, and default + extra db
+    db_default = load_database()
+    db_extra = load_database(extra_databases=["extra_database.json"])    
+    # verify that custom model exists in db
+    assert 'EOT20_custom' not in db_default["elevation"].keys()
+    assert 'EOT20_custom' in db_extra["elevation"].keys()    
+    # verify default db is a subset of default + extra db
+    assert db_default["elevation"].items() <= db_extra["elevation"].items()
