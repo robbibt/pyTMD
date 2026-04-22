@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 model.py
-Written by Tyler Sutterley (03/2026)
+Written by Tyler Sutterley (04/2026)
 Retrieves tide model parameters for named tide models and
     from model definition files
 
@@ -13,6 +13,7 @@ PYTHON DEPENDENCIES:
         https://docs.xarray.dev/en/stable/
 
 UPDATE HISTORY:
+    Updated 04/2026: add __variables__ attribute containing model variables
     Updated 03/2026: add support for FES-native netCDF4 files
     Updated 02/2026: add HTML representation for model objects using xarray
         set tidal constituent units (if unset) in a loop
@@ -306,6 +307,8 @@ class model:
         d: dict
             Model object parameters
         """
+        # copy model parameters
+        self.__parameters__ = copy.copy(d)
         for key, val in d.items():
             if isinstance(val, dict) and key not in ("projection",):
                 setattr(self, key, DataBase(val))
@@ -811,7 +814,7 @@ class model:
 
         Parameters
         ----------
-        **kwargs: dict
+        kwargs: dict
             Additional keyword arguments for opening model files
 
         Returns
@@ -822,7 +825,6 @@ class model:
         # import tide model functions
         from pyTMD.io import OTIS, ATLAS, GOT, FES
 
-        # import tide model functions
         # set default keyword arguments
         kwargs.setdefault("group", "z")
         kwargs.setdefault("use_default_units", True)
@@ -894,7 +896,7 @@ class model:
         ----------
         group: tuple, default ('z', 'u', 'v')
             List of model types to extract
-        **kwargs: dict
+        kwargs: dict
             Additional keyword arguments for opening model files
 
         Returns
@@ -931,7 +933,7 @@ class model:
         header = "pyTMD.io.model"
         header_components = [f"<div class='xr-obj-type'>{header}</div>"]
         sections = []
-        data_vars = [k for k in ("z", "u", "v") if k in self.__parameters__]
+        data_vars = self.__variables__.copy()
         parameters = {
             k: v for k, v in self.__parameters__.items() if k not in data_vars
         }
@@ -949,6 +951,11 @@ class model:
         return xr.core.formatting_html._obj_repr(
             self, header_components, sections
         )
+
+    @property
+    def __variables__(self):
+        """List of model variables"""
+        return [k for k in ("z", "u", "v") if k in self.__parameters__]
 
     def get(self, key, default=None):
         return getattr(self, key, default) or default
