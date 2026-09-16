@@ -298,10 +298,10 @@ def open_atlas_dataset(
         ds.coords["x"] = tmp["lon_v"]
         ds.coords["y"] = tmp["lat_v"]
         ds[con].attrs["units"] = tmp["vRe"].attrs.get("units")
+    # set complex zero values to nan
+    ds = ds.where(ds[con] != 0, None, drop=False)
     # swap dimension names
     ds = ds.swap_dims(dict(nx="x", ny="y"))
-    # set complex zero values to nan
-    ds = ds.where(ds[con] != 0)
     # add attributes
     ds.attrs["format"] = "ATLAS"
     ds.attrs["group"] = group.upper() if group in ("u", "v") else group
